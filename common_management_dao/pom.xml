@@ -21,5 +21,16 @@
             <artifactId>common_management_domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- oracle数据库驱动，需要手动安装 -->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc14</artifactId>
+        </dependency>
+        <!-- spring data jpa -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>${springdatajpa.version}</version>
+        </dependency>
     </dependencies>
 </project>
