@@ -32,11 +32,11 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "${pageContext.request.contextPath}/data/standard.json",
+					url : "${pageContext.request.contextPath}/standardAction_findByPage.action",
 					idField : 'id',
 					columns : columns
 				});
-			});	
+			});
 			
 			//工具栏
 			var toolbar = [ {
@@ -44,21 +44,38 @@
 				text : '增加',
 				iconCls : 'icon-add',
 				handler : function(){
-					alert('增加');
+					$("#standardWindow").window("open");
 				}
 			}, {
 				id : 'button-edit',
 				text : '修改',
 				iconCls : 'icon-edit',
 				handler : function(){
-					alert('修改');
+				    var rows = $("#grid").datagrid("getSelections");
+				    if(rows.length!=1){
+				        $.messager.alert("警告","必须选中某一项进行修改!")
+					}else{
+						$("#standardForm").form("load",rows[0]);
+                        $("#standardWindow").window("open");
+                    }
 				}
 			},{
 				id : 'button-delete',
 				text : '作废',
 				iconCls : 'icon-cancel',
 				handler : function(){
-					alert('作废');
+                    var rows = $("#grid").datagrid("getSelections");
+                    if(rows.length<1){
+                        $.messager.alert("警告","请选择将作废的项!")
+                    }else{
+                        /*$.each(rows,function (index, element) {
+							$("#grid").datagrid("deleteRow",{
+                                index : index,
+                                url : "${pageContext.request.contextPath}/standardAction_delete.action"
+							})
+                        })*/
+						//TODO
+                    }
 				}
 			},{
 				id : 'button-restore',
@@ -114,6 +131,8 @@
 				width : 120,
 				align : 'center'
 			} ] ];
+
+
 		</script>
 	</head>
 
@@ -125,13 +144,13 @@
 		<div class="easyui-window" title="对收派标准进行添加或者修改" id="standardWindow" collapsible="false" minimizable="false" maximizable="false" modal="true" closed="true" style="width:600px;top:50px;left:200px">
 			<div region="north" style="height:31px;overflow:hidden;" split="false" border="false">
 				<div class="datagrid-toolbar">
-					<a id="save" icon="icon-save" href="#" class="easyui-linkbutton" plain="true">保存</a>
+					<a id="save" icon="icon-save" href="javascript:;" class="easyui-linkbutton" plain="true">保存</a>
 				</div>
 			</div>
 
 			<div region="center" style="overflow:auto;padding:5px;" border="false">
 				
-				<form>
+				<form action="${pageContext.request.contextPath}/standardAction_save.action" method="post" id="standardForm">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="2">收派标准信息
@@ -176,5 +195,17 @@
 			</div>
 		</div>
 	</body>
+	<
+	<script type="text/javascript">
 
+        //增加/修改按钮点击事件
+        $("#save").click(function () {
+            //验证表单数据
+            var r = $("#standardForm").form("validate");
+            if(r){
+                //提交添加/修改收派标准的表单
+                $("#standardForm").submit();
+            }
+        });
+	</script>
 </html>

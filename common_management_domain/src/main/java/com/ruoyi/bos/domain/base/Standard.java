@@ -3,13 +3,7 @@ package com.ruoyi.bos.domain.base;
 
 
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -19,7 +13,8 @@ import java.util.Date;
 @Table(name = "T_STANDARD")
 public class Standard {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy= GenerationType.SEQUENCE, generator="StandardSequence")
+	@SequenceGenerator(name = "StandardSequence", sequenceName = "SEQ_Standard", allocationSize=1)
 	@Column(name = "C_ID")
 	private Integer id; // 主键
 	@Column(name = "C_NAME")

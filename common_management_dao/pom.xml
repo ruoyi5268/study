@@ -21,6 +21,12 @@
             <artifactId>common_management_domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- 数据库连接池 -->
+        <dependency>
+            <groupId>c3p0</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>${c3p0.version}</version>
+        </dependency>
         <!-- oracle数据库驱动，需要手动安装 -->
         <dependency>
             <groupId>com.oracle</groupId>
