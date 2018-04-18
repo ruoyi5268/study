@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
 * @Title: StandardServiceImpl
 * @Description: <p>  </p>
-* @author zhaohuan
+* @author zh
 * @date 2018/4/14 19:27
 * @version V1.0
 */
@@ -34,8 +36,29 @@ public class StandardServiceImpl implements StandardService {
         return standardDao.findAll(pageable);
     }
 
+    /**
+     * 保存/修改取派标准
+     * @param model
+     */
     @Override
     public void save(Standard model) {
         standardDao.save(model);
+    }
+
+    /**
+     * 删除取派标准
+     * @param iids
+     */
+    @Override
+    public void delete(String ids) {
+        String[] strings = ids.split(",");
+        for (String id : strings) {
+            standardDao.delete(Integer.parseInt(id));
+        }
+    }
+
+    @Override
+    public List<Standard> findAll() {
+        return standardDao.findAll();
     }
 }

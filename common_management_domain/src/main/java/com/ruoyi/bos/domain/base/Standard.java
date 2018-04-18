@@ -1,8 +1,5 @@
 package com.ruoyi.bos.domain.base;
 
-
-
-
 import javax.persistence.*;
 import java.util.Date;
 

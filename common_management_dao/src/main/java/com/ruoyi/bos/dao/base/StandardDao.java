@@ -4,7 +4,7 @@ import com.ruoyi.bos.domain.base.Standard;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * @author zhaohuan
+ * @author zh
  * @version V1.0
  * @Title: StandardDao
  * @Description: <p>  </p>

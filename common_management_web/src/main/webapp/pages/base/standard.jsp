@@ -68,13 +68,12 @@
                     if(rows.length<1){
                         $.messager.alert("警告","请选择将作废的项!")
                     }else{
-                        /*$.each(rows,function (index, element) {
-							$("#grid").datagrid("deleteRow",{
-                                index : index,
-                                url : "${pageContext.request.contextPath}/standardAction_delete.action"
-							})
-                        })*/
-						//TODO
+                        var array = new Array();
+                        for(var i=0; i<rows.length; i++){
+                            array.push(rows[i].id);
+						}
+						var ids=array.join(",");
+                        location.href="${pageContext.request.contextPath}/standardAction_deleteBatch.action?ids="+ids;
                     }
 				}
 			},{

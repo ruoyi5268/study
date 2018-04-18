@@ -17,16 +17,38 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyui/ext/jquery.cookie.js"></script>
 		<script src="${pageContext.request.contextPath}/js/easyui/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
 		<script type="text/javascript">
+			function doSearch(){
+				$('#searchWindow').window("open");
+			}
+
 			function doAdd(){
 				$('#addWindow').window("open");
 			}
 			
 			function doEdit(){
-				alert("修改...");
+				var rows = $("#grid").datagrid("getSelections");
+				console.log(rows.length);
+				if(rows.length != 1){
+				    $.messager.alert("警告","请选中一项进行修改","info");
+				}else {
+				    $("#courierForm").form("load",rows[0]);
+				    $("#standardId").combobox({"value":rows[0].standard.id});
+				    $("#addWindow").window("open");
+				}
 			}
 			
 			function doDelete(){
-				alert("删除...");
+                var rows = $("#grid").datagrid("getSelections");
+                if(rows.length < 1){
+                    $.messager.alert("警告","请选中要删除的列","info");
+                }else{
+                    var array = new Array();
+                    for(var i=0; i<rows.length;i++){
+                        array.push(rows[i].id);
+					}
+					var ids = array.join(",");
+                    location.href="${pageContext.request.contextPath}/courierAction_deleteBatch.action?ids="+ids;
+				}
 			}
 			
 			function doRestore(){
@@ -34,6 +56,11 @@
 			}
 			//工具栏
 			var toolbar = [ {
+                id : 'button-search',
+                text : '查询',
+                iconCls : 'icon-search',
+                handler : doSearch
+            }, {
 				id : 'button-add',	
 				text : '增加',
 				iconCls : 'icon-add',
@@ -142,7 +169,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "${pageContext.request.contextPath}/data/courier.json",
+					url : "${pageContext.request.contextPath}/courierAction_findByPage.action",
 					idField : 'id',
 					columns : columns,
 					onDblClickRow : doDblClickRow
@@ -159,7 +186,43 @@
 			        resizable:false
 			    });
 				
+				//保存/更新快递员信息
+				$("#save").click(function () {
+					var r = $("#courierForm").form("validate");
+					if(r){
+                        $("#courierForm").submit();
+					}
+                });
+				
+				//查询快递员
+				$("#searchBtn").click(function () {
+				    //序列化表单,得到查询条件
+					var condition = $("#searchForm").serializeJson();
+					//重新加载数据表格,并将条件作为参数传递
+					$("#grid").datagrid("load",condition);
+					$("#searchWindow").window("close");
+                });
+
 			});
+
+			//序列化表单
+            $.fn.serializeJson=function(){
+                var serializeObj={};
+                var array=this.serializeArray();
+                var str=this.serialize();
+                $(array).each(function(){
+                    if(serializeObj[this.name]){
+                        if($.isArray(serializeObj[this.name])){
+                            serializeObj[this.name].push(this.value);
+                        }else{
+                            serializeObj[this.name]=[serializeObj[this.name],this.value];
+                        }
+                    }else{
+                        serializeObj[this.name]=this.value;
+                    }
+                });
+                return serializeObj;
+            };
 		
 			function doDblClickRow(){
 				alert("双击表格数据...");
@@ -179,8 +242,14 @@
 			</div>
 
 			<div region="center" style="overflow:auto;padding:5px;" border="false">
-				<form>
+				<form action="${pageContext.request.contextPath}/courierAction_save.action" method="post" id="courierForm">
 					<table class="table-edit" width="80%" align="center">
+						<tr class="title">
+							<td colspan="2">快递员id
+								<!--提供隐藏域 装载id -->
+								<input type="hidden" name="id" />
+							</td>
+						</tr>
 						<tr class="title">
 							<td colspan="4">收派员信息</td>
 						</tr>
@@ -221,10 +290,10 @@
 							</td>
 							<td>取派标准</td>
 							<td>
-								<input type="text" name="standard.id" 
+								<input id="standardId" type="text" name="standard.id"
 										class="easyui-combobox" 
 										data-options="required:true,valueField:'id',textField:'name',
-											url:'${pageContext.request.contextPath}/standard_findAll.action'"/>
+											url:'${pageContext.request.contextPath}/standardAction_findAll.action'"/>
 							</td>
 						</tr>
 						<tr>
@@ -259,7 +328,10 @@
 						<tr>
 							<td>收派标准</td>
 							<td>
-								<input type="text" name="standard.name" />
+								<input id="standardId4Search" type="text" name="standard.id"
+									   class="easyui-combobox"
+									   data-options="valueField:'id',textField:'name',
+											url:'${pageContext.request.contextPath}/standardAction_findAll.action'"/>
 							</td>
 						</tr>
 						<tr>
@@ -282,5 +354,5 @@
 			</div>
 		</div>
 	</body>
-
+	
 </html>

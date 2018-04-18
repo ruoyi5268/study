@@ -2,8 +2,12 @@ package com.ruoyi.bos.service.base;
 
 import com.ruoyi.bos.domain.base.Standard;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable; /**
- * @author zhaohuan
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+
+/**
+ * @author zh
  * @version V1.0
  * @Title: StandardService
  * @Description: <p>  </p>
@@ -19,4 +23,8 @@ public interface StandardService {
     Page<Standard> findByPage(Pageable pageable);
 
     void save(Standard model);
+
+    void delete(String id);
+
+    List<Standard> findAll();
 }
