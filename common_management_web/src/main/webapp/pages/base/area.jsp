@@ -16,6 +16,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyui/ext/jquery.portal.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyui/ext/jquery.cookie.js"></script>
 		<script src="${pageContext.request.contextPath}/js/easyui/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/upload/jquery.ocupload-1.1.2.js"></script>
 		<script type="text/javascript">
 			function doAdd(){
 				$('#addWindow').window("open");
@@ -100,7 +101,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "${pageContext.request.contextPath}/data/area.json",
+					url : "${pageContext.request.contextPath}/areaAction_findByPage.action",
 					idField : 'id',
 					columns : columns,
 					onDblClickRow : doDblClickRow
@@ -116,6 +117,14 @@
 			        height: 400,
 			        resizable:false
 			    });
+
+				$("#button-import").upload({
+					name:"uploadFile",
+					action:"${pageContext.request.contextPath}/areaAction_importXls.action",
+                    onComplete: function() {
+					    $("#grid").datagrid("reload");
+					}
+				});
 				
 			});
 		
