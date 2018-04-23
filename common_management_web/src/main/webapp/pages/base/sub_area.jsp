@@ -17,6 +17,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/easyui/ext/jquery.cookie.js"></script>
 		<script src="${pageContext.request.contextPath}/js/easyui/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/highcharts.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/upload/jquery.ocupload-1.1.2.js"></script>
 		<script type="text/javascript">
 			function doAdd(){
 				$('#addWindow').window("open");
@@ -36,11 +37,7 @@
 			
 			//导出按钮绑定的事件
 			function doExport(){
-				
-			}
-			
-			function doImport(){
-				alert("导入");
+			    window.location.href="${pageContext.request.contextPath}/subAreaAction_exportXls.action";
 			}
 			
 			function doShowChart(){
@@ -70,8 +67,7 @@
 			},{
 				id : 'button-import',
 				text : '导入',
-				iconCls : 'icon-redo',
-				handler : doImport
+				iconCls : 'icon-redo'
 			},{
 				id : 'button-export',
 				text : '导出',
@@ -129,17 +125,17 @@
 					return "" ;
 				}
 			}, {
-				field : 'addresskey',
+				field : 'keyWords',
 				title : '关键字',
 				width : 120,
 				align : 'center'
 			}, {
-				field : 'startnum',
+				field : 'startNum',
 				title : '起始号',
 				width : 100,
 				align : 'center'
 			}, {
-				field : 'endnum',
+				field : 'endNum',
 				title : '终止号',
 				width : 100,
 				align : 'center'
@@ -164,7 +160,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "${pageContext.request.contextPath}/data/sub_area.json",
+					url : "${pageContext.request.contextPath}/subAreaAction_findByPage.action",
 					idField : 'id',
 					columns : columns,
 					onDblClickRow : doDblClickRow
@@ -203,6 +199,17 @@
 				$("#btn").click(function(){
 					alert("执行查询...");
 				});
+
+				//导入数据
+				$("#button-import").upload({
+                    name: 'uploadFile',
+                    enctype: 'multipart/form-data',
+                    action: '${pageContext.request.contextPath}/subAreaAction_importXls.action',
+                    autoSubmit: true,
+                    onComplete: function() {
+                        $("#grid").datagrid("reload");
+					}
+				})
 			});
 		
 			function doDblClickRow(){

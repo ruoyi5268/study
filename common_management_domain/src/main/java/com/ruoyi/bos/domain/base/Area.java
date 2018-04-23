@@ -41,8 +41,14 @@ public class Area {
 		// TODO Auto-generated constructor stub
 	}
 
+	public Area(String province, String city, String district) {
+		this.province = province;
+		this.city = city;
+		this.district = district;
+	}
+
 	public Area(String id, String province, String city, String district, String postcode, String citycode,
-			String shortcode) {
+				String shortcode) {
 		super();
 		this.id = id;
 		this.province = province;

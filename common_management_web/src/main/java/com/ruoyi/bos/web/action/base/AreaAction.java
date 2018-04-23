@@ -11,6 +11,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.struts2.convention.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 
 import java.io.File;
@@ -45,6 +48,15 @@ public class AreaAction extends BaseAction<Area>{
     private String uploadFile;
     public void setUploadFile(String uploadFile) {
         this.uploadFile = uploadFile;
+    }
+
+    @Action("areaAction_findByPage")
+    public String findBypage(){
+
+        Pageable pageable = new PageRequest(page-1,rows);
+        Page<Area> page = areaService.findByPage(pageable);
+        this.java2Json(page,new String[]{"subareas"});
+        return NONE;
     }
 
     /**
