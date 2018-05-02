@@ -96,7 +96,7 @@ public class BaseAction<T> extends ActionSupport implements ModelDriven<T>{
     /**
      * 集合转json
      */
-    public void java2Json(List<T> list, String[] excludes){
+    public void java2Json(List list, String[] excludes){
         JsonConfig jsonConfig = new JsonConfig();
         jsonConfig.setExcludes(excludes);
 

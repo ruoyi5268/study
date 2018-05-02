@@ -32,11 +32,79 @@
 			function doSearch(){
 				$('#searchWindow').window("open");
 			}
-			
+
+			//关联客户
 			function doAssociations(){
-				$('#customerWindow').window('open');
+                var rows = $("#grid").datagrid('getSelections');
+                if(rows.length!=1){
+                    $.messager.alert("警告","请选中一条记录进行操作","warning");
+				}else{
+					//去客户端查找未关联定区的客户
+                    $("#noassociationSelect").empty();
+					$.post(
+						"${pageContext.request.contextPath}/fixedAreaAction_noAssociation.action",
+						null,
+						function (data) {
+						    if(data.length != 0){
+								for(var i=0; i<data.length; i++){
+									$("#noassociationSelect").append("<option value='"+data[i].id+"'>"+data[i].username+":"+data[i].address+"</option>");
+								}
+							}
+						}
+					);
+					//去客户端查找已关联定区的客户
+                    $("#associationSelect").empty();
+					$.post(
+						"${pageContext.request.contextPath}/fixedAreaAction_hasAssociation.action?id="+rows[0].id,
+						null,
+						function (data) {
+                            if(data.length != 0){
+								for(var i=0; i<data.length; i++){
+									$("#associationSelect").append("<option value='"+data[i].id+"'>"+data[i].username+":"+data[i].address+"</option>");
+								}
+							}
+						}
+					);
+					$('#customerWindow').window('open');
+				}
 			}
-			
+
+			//关联分区
+			function doAssociationsSubArea(){
+                var rows = $("#grid").datagrid('getSelections');
+                if(rows.length!=1){
+                    $.messager.alert("警告","请选中一条记录进行操作","warning");
+				}else{
+					//去客户端查找未关联定区的分区
+                    $("#noassociationSelect").empty();
+					$.post(
+						"${pageContext.request.contextPath}/subAreaAction_noAssociationSubarea.action",
+						null,
+						function (data) {
+						    if(data.length != 0){
+								for(var i=0; i<data.length; i++){
+									$("#noassociationSelect1").append("<option value='"+data[i].id+"'>"+data[i].keyWords+"/"+data[i].assistKeyWords+"</option>");
+								}
+							}
+						}
+					);
+					//去客户端查找已关联定区的分区
+                    $("#associationSelect").empty();
+					$.post(
+						"${pageContext.request.contextPath}/subAreaAction_hasAssociationSubarea.action?subareaFixedAreaId="+rows[0].id,
+						null,
+						function (data) {
+                            if(data.length != 0){
+								for(var i=0; i<data.length; i++){
+									$("#associationSelect1").append("<option value='"+data[i].id+"'>"+data[i].keyWords+"/"+data[i].assistKeyWords+"</option>");
+								}
+							}
+						}
+					);
+					$('#subareaWindow').window('open');
+				}
+			}
+
 			//工具栏
 			var toolbar = [ {
 				id : 'button-search',	
@@ -72,7 +140,24 @@
 					var rows = $("#grid").datagrid('getSelections');
 					if(rows.length==1){
 						// 只选择了一个定区
-						// 弹出定区关联快递员 窗口 
+						//查找未与某定区关联的快递员
+                        $("#courierId").combobox({
+                            url:'${pageContext.request.contextPath}/courierAction_listajax.action?fixedAreaId='+rows[0].id,
+                            valueField:'id',
+                            textField:'name',
+							required:true,
+                            onSelect:function (record) {
+                                var courierSelected = $("#courierId").combobox("getValue");
+                                $('#taketimeId').combobox({
+									url:"${pageContext.request.contextPath}/courierAction_findTakeTime.action?id="+courierSelected,                                    valueField:'id',//值字段
+                                    textField:'name', //显示的字段      
+                                   valueField:'id',//值字段
+                                    editable:false, //不可编辑，只能选择
+                                    required:true
+                                });
+                            }
+                        });
+						// 弹出定区关联快递员 窗口
 						$("#courierWindow").window('open');
 					}else{
 						// 没有选中定区，或者选择 了多个定区
@@ -83,7 +168,7 @@
 				id : 'button-association2',
 				text : '关联分区',
 				iconCls : 'icon-sum',
-				handler : doAssociations
+				handler : doAssociationsSubArea
 			}];
 			// 定义列
 			var columns = [ [ {
@@ -128,7 +213,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "${pageContext.request.contextPath}/fixedAreaAction_pageQuery.action",
+					url : "${pageContext.request.contextPath}/fixedAreaAction_findByPage.action",
 					idField : 'id',
 					columns : columns,
 					onDblClickRow : doDblClickRow
@@ -155,15 +240,109 @@
 			        height: 400,
 			        resizable:false
 			    });
+				//确认查询定区
 				$("#btn").click(function(){
-					alert("执行查询...");
+					//序列化表单,得到查询条件
+					var condition = $("#searchForm").serializeJson();
+					//加载数据表格,带条件
+					$("#grid").datagrid("load",condition);
+                    $('#searchWindow').window("close");
 				});
-				
-			});
-		
-			function doDblClickRow(){
-				alert("双击表格数据...");
-				$('#association_subarea').datagrid( {
+
+				//添加/修改定区
+				$("#save").click(function () {
+					var r = $("#fixedAreaForm").form("validate");
+					if(r){
+						$("#fixedAreaForm").submit();
+					}
+                });
+
+				//左右移动关联的客户
+				$("#toRight").click(function () {
+					$("#associationSelect").append($("#noassociationSelect option:selected"));
+                });
+				$("#toLeft").click(function () {
+					$("#noassociationSelect").append($("#associationSelect option:selected"));
+                });
+				//双击移动客户
+                $("#noassociationSelect").dblclick(function () {
+                    $("#associationSelect").append($("#noassociationSelect option:selected"));
+                });
+                $("#associationSelect").dblclick(function () {
+                    $("#noassociationSelect").append($("#associationSelect option:selected"));
+                });
+                //关联客户
+				$("#associationBtn").click(function () {
+					//获取当前被选中的行
+					var rows = $("#grid").datagrid("getSelections");
+					//先获取定区id
+					if(rows.length==0){
+					    $.messager.alert("警告","未选中定区","warning");
+					}
+					console.log("customerFixedAreaId:"+rows[0].id);
+					var fixedAreaId = rows[0].id;
+					$("#customerFixedAreaId").val(fixedAreaId);
+					$("#associationSelect option").attr("selected","selected");
+					$("#customerForm").submit();
+                });
+
+				//关联分区
+                $("#associationBtn1").click(function () {
+                    var rows = $("#grid").datagrid("getSelections");
+                    var fixedAreaId = rows[0].id;
+                    $("#subareaFixedAreaId").val(fixedAreaId);
+                    $("#associationSelect option").attr("selected","selected");
+                    $("#subareaForm").submit();
+                });
+
+				//关联快递员
+				$("#associationCourierBtn").click(function () {
+                    var rows = $("#grid").datagrid("getSelections");
+                    var fixedAreaId = rows[0].id;
+				    $("#courierFixedAreaId").val(fixedAreaId);
+					$("#courierForm").submit();
+                });
+
+                //左右移动关联的分区
+                $("#toRight1").click(function () {
+                    $("#associationSelect1").append($("#noassociationSelect1 option:selected"));
+                });
+                $("#toLeft1").click(function () {
+                    $("#noassociationSelect1").append($("#associationSelect1 option:selected"));
+                });
+                //双击移动分区
+                $("#noassociationSelect1").dblclick(function () {
+                    $("#associationSelect1").append($("#noassociationSelect1 option:selected"));
+                });
+                $("#associationSelect1").dblclick(function () {
+                    $("#noassociationSelect1").append($("#associationSelect1 option:selected"));
+                });
+
+            });
+
+			//将表单序列化成json对象
+            $.fn.serializeJson=function(){
+                var serializeObj={};
+                var array=this.serializeArray();
+                var str=this.serialize();
+                $(array).each(function(){
+                    if(serializeObj[this.name]){
+                        if($.isArray(serializeObj[this.name])){
+                            serializeObj[this.name].push(this.value);
+                        }else{
+                            serializeObj[this.name]=[serializeObj[this.name],this.value];
+                        }
+                    }else{
+                        serializeObj[this.name]=this.value;
+                    }
+                });
+                return serializeObj;
+            };
+
+            function doDblClickRow(index,rowData){
+				console.log(rowData);
+
+                $('#association_subarea').datagrid( {
 					fit : true,
 					border : true,
 					rownumbers : true,
@@ -239,14 +418,14 @@
 					border : true,
 					rownumbers : true,
 					striped : true,
-					url : "${pageContext.request.contextPath}/data/association_customer.json",
+					url : "${pageContext.request.contextPath}/fixedAreaAction_findAssociationCustomers.action?id="+rowData.id,
 					columns : [[{
 						field : 'id',
 						title : '客户编号',
 						width : 120,
 						align : 'center'
 					},{
-						field : 'name',
+						field : 'username',
 						title : '客户名称',
 						width : 120,
 						align : 'center'
@@ -257,7 +436,72 @@
 						align : 'center'
 					}]]
 				});
-				
+                $('#association_courier').datagrid( {
+                    fit : true,
+                    border : true,
+                    rownumbers : true,
+                    striped : true,
+                    url : "${pageContext.request.contextPath}/fixedAreaAction_findAssociationCourier.action?id="+rowData.id,
+                    columns : [[{
+                        field : 'id',
+                        title : '编号',
+                        width : 120,
+                        align : 'center'
+                    },{
+                        field : 'name',
+                        title : '姓名',
+                        width : 120,
+                        align : 'center'
+                    }, {
+                        field : 'company',
+                        title : '所属单位',
+                        width : 120,
+                        align : 'center'
+                    }, {
+                        field : 'type',
+                        title : '类型',
+                        width : 120,
+                        align : 'center'
+                    }, {
+                        field : 'telephone',
+                        title : '电话',
+                        width : 120,
+                        align : 'center'
+                    }]]
+                });
+                $('#association_subarea').datagrid( {
+                    fit : true,
+                    border : true,
+                    rownumbers : true,
+                    striped : true,
+                    url : "${pageContext.request.contextPath}/fixedAreaAction_findAssociationSubArea.action?id="+rowData.id,
+                    columns : [[{
+                        field : 'id',
+                        title : '编号',
+                        width : 120,
+                        align : 'center'
+                    },{
+                        field : 'keyWords',
+                        title : '关键字',
+                        width : 120,
+                        align : 'center'
+                    }, {
+                        field : 'assistKeyWords',
+                        title : '辅助关键字',
+                        width : 120,
+                        align : 'center'
+                    }, {
+                        field : 'startNum',
+                        title : '起始号',
+                        width : 120,
+                        align : 'center'
+                    }, {
+                        field : 'endNum',
+                        title : '终止号',
+                        width : 120,
+                        align : 'center'
+                    }]]
+                });
 			}
 		</script>
 	</head>
@@ -270,6 +514,9 @@
 			<div id="tabs" fit="true" class="easyui-tabs">
 				<div title="关联分区" id="subArea" style="width:100%;height:100%;overflow:hidden">
 					<table id="association_subarea"></table>
+				</div>
+				<div title="关联快递员" id="courier" style="width:100%;height:100%;overflow:hidden">
+					<table id="association_courier"></table>
 				</div>
 				<div title="关联客户" id="customers" style="width:100%;height:100%;overflow:hidden">
 					<table id="association_customer"></table>
@@ -324,7 +571,7 @@
 		<!-- 查询定区 -->
 		<div class="easyui-window" title="查询定区窗口" id="searchWindow" collapsible="false" minimizable="false" maximizable="false" style="top:20px;left:200px">
 			<div style="overflow:auto;padding:5px;" border="false">
-				<form>
+				<form id="searchForm">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="2">查询条件</td>
@@ -341,12 +588,12 @@
 								<input type="text" name="courier.company" class="easyui-validatebox" required="true" />
 							</td>
 						</tr>
-						<tr>
+						<!--<tr>
 							<td>分区</td>
 							<td>
 								<input type="text" name="subareaName" class="easyui-validatebox" required="true" />
 							</td>
-						</tr>
+						</tr>-->
 						<tr>
 							<td colspan="2"><a id="btn" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a> </td>
 						</tr>
@@ -356,16 +603,16 @@
 		</div>
 
 		<!-- 关联客户窗口 -->
-		<div modal="true" class="easyui-window" title="关联客户窗口" id="customerWindow" collapsible="false" closed="true" minimizable="false" maximizable="false" style="top:20px;left:200px;width: 400px;height: 300px;">
+		<div modal="true" class="easyui-window" title="关联客户窗口" id="customerWindow" collapsible="false" closed="true" minimizable="false" maximizable="false" style="top:20px;left:200px;width: 750px;height: 300px;">
 			<div style="overflow:auto;padding:5px;" border="false">
-				<form id="customerForm" action="${pageContext.request.contextPath}/fixedAreaAction_assignCustomers2FixedArea.action" method="post">
+				<form id="customerForm" action="${pageContext.request.contextPath}/fixedAreaAction_assignCustomers2FixedArea.action"  method="post">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="3">关联客户</td>
 						</tr>
 						<tr>
 							<td>
-								<input type="hidden" name="id" id="customerFixedAreaId" />
+								<input type="hidden" name="customerFixedAreaId" id="customerFixedAreaId" />
 								<select id="noassociationSelect" multiple="multiple" size="10"></select>
 							</td>
 							<td>
@@ -379,6 +626,36 @@
 						</tr>
 						<tr>
 							<td colspan="3"><a id="associationBtn" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'">关联客户</a> </td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+
+		<!-- 关联分区窗口 -->
+		<div modal="true" class="easyui-window" title="关联分区窗口" id="subareaWindow" collapsible="false" closed="true" minimizable="false" maximizable="false" style="top:20px;left:200px;width: 750px;height: 300px;">
+			<div style="overflow:auto;padding:5px;" border="false">
+				<form id="subareaForm" action="${pageContext.request.contextPath}/fixedAreaAction_assignSubArea2FixedArea.action"  method="post">
+					<table class="table-edit" width="80%" align="center">
+						<tr class="title">
+							<td colspan="3">关联分区</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="hidden" name="subareaFixedAreaId" id="subareaFixedAreaId" />
+								<select id="noassociationSelect1" multiple="multiple" size="10"></select>
+							</td>
+							<td>
+								<input type="button" value="》》" id="toRight1">
+								<br/>
+								<input type="button" value="《《" id="toLeft1">
+							</td>
+							<td>
+								<select id="associationSelect1" name="subareaIds" multiple="multiple" size="10"></select>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3"><a id="associationBtn1" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'">关联分区</a> </td>
 						</tr>
 					</table>
 				</form>
@@ -400,18 +677,19 @@
 							<td>
 								<!-- 存放定区编号 -->
 								<input type="hidden" name="id" id="courierFixedAreaId" />
-								<input data-options="ditable:false, url:'${pageContext.request.contextPath}/courierAction_listajax.action',valueField:'id',textField:'name'"
-									 type="text" name="courierId" class="easyui-combobox" required="true" />
+
+								<input type="text" id="courierId" name="courierId"/>
 							</td>
 						</tr>
 						<tr>
 							<td>选择收派时间</td>
 							<td>
-								<select required="true" class="easyui-combobox" name="takeTimeId">
+                                <input type="text" id="taketimeId" name="taketimeId" />
+								<!--<select required="true" class="easyui-combobox" name="takeTimeId">
 									<option>请选择</option>
 									<option value="1">北京早班</option>
 									<option value="2">北京晚班</option>
-								</select>
+								</select>-->
 								<!-- <input type="text" name="takeTimeId" class="easyui-combobox" required="true" /> -->
 							</td>
 						</tr>

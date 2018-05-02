@@ -31,7 +31,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "${pageContext.request.contextPath}/data/take_time.json",
+					url : "${pageContext.request.contextPath}/takeTimeAction_findByPage.action",
 					idField : 'id',
 					columns : columns
 				});

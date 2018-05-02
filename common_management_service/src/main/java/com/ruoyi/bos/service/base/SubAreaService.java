@@ -23,4 +23,8 @@ public interface SubAreaService {
     Page<SubArea> findByPage(Pageable pageable);
 
     List<SubArea> findAll();
+
+    List<SubArea> noAssociationSubarea();
+
+    List<SubArea> hasAssociationSubarea(String subareaFixedAreaId);
 }

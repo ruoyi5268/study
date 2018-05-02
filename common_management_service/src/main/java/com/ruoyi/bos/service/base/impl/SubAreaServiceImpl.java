@@ -39,4 +39,14 @@ public class SubAreaServiceImpl implements SubAreaService{
     public List<SubArea> findAll() {
         return subAreaDao.findAll();
     }
+
+    @Override
+    public List<SubArea> noAssociationSubarea() {
+        return subAreaDao.noAssociationSubarea();
+    }
+
+    @Override
+    public List<SubArea> hasAssociationSubarea(String subareaFixedAreaId) {
+        return subAreaDao.hasAssociationSubarea(subareaFixedAreaId);
+    }
 }

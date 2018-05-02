@@ -7,6 +7,9 @@
     <groupId>com.ruoyi</groupId>
     <artifactId>common_parent</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>common_management_crm</module>
+    </modules>
     <packaging>pom</packaging>
 
     <properties>

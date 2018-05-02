@@ -24,17 +24,17 @@
 
     <!-- 连接池 url中的ip地址 -->
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-        <property name="driverClass" value="oracle.jdbc.driver.OracleDriver"/>
+        <property name="driverClass" value="oracle.jdbc.driver.OracleDriver" />
         <property name="jdbcUrl" value="jdbc:oracle:thin:@192.168.32.128:1521:ORCL" />
-        <property name="user" value="bos" />
-        <property name="password" value="bos" />
+        <property name="user" value="bos_crm" />
+        <property name="password" value="bos_crm" />
     </bean>
 
     <!-- spring整合JPA -->
     <bean id="entityManagerFactory"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="packagesToScan" value="com.ruoyi.bos.domain" />
+        <property name="packagesToScan" value="com.ruoyi.crm.domain" />
         <!-- 指定持久层提供者为Hibernate -->
         <property name="persistenceProvider">
             <bean class="org.hibernate.ejb.HibernatePersistence" />
@@ -59,18 +59,20 @@
     </bean>
 
     <!-- 组件扫描 @Server @Controller @Repository -->
-    <context:component-scan base-package="com.ruoyi"/>
+    <context:component-scan base-package="com.ruoyi.crm"/>
 
     <!-- 事务注解支持 -->
     <tx:annotation-driven transaction-manager="transactionManager" />
 
     <!-- 整合 spring data jpa -->
-    <jpa:repositories base-package="com.ruoyi.bos.dao" />
+    <jpa:repositories base-package="com.ruoyi.crm.dao" />
 
-    <!-- 在这里引用服务 -->
-    <jaxws:client id="customerProxy" address="http://localhost:8080/crm/service/customer"
-        serviceClass="com.ruoyi.crm.service.CustomerService">
-    </jaxws:client>
+    <!-- 配置CXF服务端 -->
+    <jaxws:server id="customerServer" address="/customer">
+        <jaxws:serviceBean>
+            <ref bean="customerService"></ref>
+        </jaxws:serviceBean>
+    </jaxws:server>
 
 
 </beans>

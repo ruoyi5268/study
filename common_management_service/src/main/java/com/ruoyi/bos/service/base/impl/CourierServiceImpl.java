@@ -3,6 +3,7 @@ package com.ruoyi.bos.service.base.impl;
 import com.ruoyi.bos.dao.base.CourierDao;
 import com.ruoyi.bos.domain.base.Courier;
 import com.ruoyi.bos.domain.base.Standard;
+import com.ruoyi.bos.domain.base.TakeTime;
 import com.ruoyi.bos.service.base.CourierService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,4 +114,20 @@ public class CourierServiceImpl implements CourierService {
             courierDao.virtualDelete(Integer.parseInt(id));
         }
     }
+
+    /**
+     * 查找与当前定区没有关联的未作废的快递员
+     * @param fixedAreaId
+     */
+    @Override
+    public List<Courier> findNoAssociationFixedArea(String fixedAreaId) {
+        return courierDao.findNoAssociationFixedArea(fixedAreaId);
+    }
+
+    @Override
+    public Courier findById(Integer id) {
+        return courierDao.findOne(id);
+    }
+
+
 }

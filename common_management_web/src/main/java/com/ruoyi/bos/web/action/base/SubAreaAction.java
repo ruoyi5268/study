@@ -55,6 +55,37 @@ public class SubAreaAction extends BaseAction<SubArea> {
     private AreaService areaService;
 
     /**
+     * 属性驱动封装定区ID
+     */
+    private String subareaFixedAreaId;
+    public void setSubareaFixedAreaId(String subareaFixedAreaId) {
+        this.subareaFixedAreaId = subareaFixedAreaId;
+    }
+
+    /**
+     * 未关联到定区的分区
+     * @return
+     */
+    @Action("subAreaAction_noAssociationSubarea")
+    public String noAssociationSubarea(){
+
+        List<SubArea> list = subAreaService.noAssociationSubarea();
+        this.java2Json(list,new String[]{"subareas","couriers"});
+        return NONE;
+    }
+
+    /**
+     * 已关联到定区的分区
+     * @return
+     */
+    @Action("subAreaAction_hasAssociationSubarea")
+    public String hasAssociationSubarea(){
+        List<SubArea> list = subAreaService.hasAssociationSubarea(subareaFixedAreaId);
+        this.java2Json(list,new String[]{"subareas","couriers"});
+        return NONE;
+    }
+
+    /**
      * 导入分区数据
      * @return
      */
@@ -115,6 +146,10 @@ public class SubAreaAction extends BaseAction<SubArea> {
         return NONE;
     }
 
+    /**
+     * 导出
+     * @return
+     */
     @Action("subAreaAction_exportXls")
     public String exportXls(){
         //1.获取数据

@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @author zh
  * @version V1.0
@@ -23,4 +25,7 @@ public interface CourierDao extends JpaRepository<Courier, Integer>, JpaSpecific
     @Modifying
     @Query("update Courier set deltag = '1' where id = ?")
     void virtualDelete(int id);
+
+    @Query("from Courier c1 where c1.deltag='0' and c1.id not in(select c.id from Courier c inner join c.fixedAreas f on f.id=?)")
+    List<Courier> findNoAssociationFixedArea(String fixedAreaId);
 }

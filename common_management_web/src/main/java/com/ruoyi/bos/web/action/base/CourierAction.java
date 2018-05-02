@@ -2,9 +2,13 @@ package com.ruoyi.bos.web.action.base;
 
 import com.ruoyi.bos.domain.base.Courier;
 import com.ruoyi.bos.domain.base.Standard;
+import com.ruoyi.bos.domain.base.TakeTime;
 import com.ruoyi.bos.service.base.CourierService;
 import com.ruoyi.bos.web.action.common.BaseAction;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -18,6 +22,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Predicate;
+import java.io.IOException;
+import java.util.List;
 
 /**
 * @Title: CourierAction
@@ -38,6 +44,40 @@ public class CourierAction extends BaseAction<Courier>{
 
     @Autowired
     private CourierService courierService;
+
+    @Action("courierAction_findTakeTime")
+    public String findTakeTime(){
+        Courier courier = courierService.findById(model.getId());
+        TakeTime takeTime = courier.getTakeTime();
+        String json = JSONArray.fromObject(takeTime).toString();
+        ServletActionContext.getResponse().setContentType("text/json;charset=utf-8");
+        try {
+            ServletActionContext.getResponse().getWriter().print(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return NONE;
+    }
+
+
+    /**
+     * 属性驱动封装定区id
+     */
+    private String fixedAreaId;
+    public void setFixedAreaId(String fixedAreaId) {
+        this.fixedAreaId = fixedAreaId;
+    }
+
+    /**
+     * 查找没有被当前定区关联的快递员(1.没有被作废 2.不负责本定区)
+     * @return
+     */
+    @Action("courierAction_listajax")
+    public String listajax(){
+        List<Courier> list = courierService.findNoAssociationFixedArea(fixedAreaId);
+        this.java2Json(list, new String[]{"fixedAreas"});
+        return NONE;
+    }
 
     /**
      * 快递员信息分页展示,ajax请求
